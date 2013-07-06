@@ -11,19 +11,19 @@ MenuBar::MenuBar(QWidget *parent) :
     setWindowFlags(Qt::Tool |Qt::X11BypassWindowManagerHint|Qt::FramelessWindowHint);
     //setAttribute(Qt::WA_TranslucentBackground);
     setWindowOpacity(0.7);
-
+    maximize=false;
     layout=new QVBoxLayout(this);
 
     layout1=new QHBoxLayout();
     layout1->addStretch();
     minimumBtn=new PicturePushButton();
-    minimumBtn->setPixmapPath(ICON_PATH+"min_icon.png");
+    minimumBtn->setPixmapPath(ICON_PATH+"minus.png");
     minimumBtn->setSizeExt(QSize(16,16));
     maximumBtn=new PicturePushButton();
-    maximumBtn->setPixmapPath(ICON_PATH+"max_icon.png");
+    maximumBtn->setPixmapPath(ICON_PATH+"plus.png");
     maximumBtn->setSizeExt(QSize(16,16));
     closeBtn=new PicturePushButton();
-    closeBtn->setPixmapPath(ICON_PATH+"close_icon.png");
+    closeBtn->setPixmapPath(ICON_PATH+"delete.png");
     closeBtn->setSizeExt(QSize(16,16));
     layout1->addWidget(minimumBtn);
     layout1->addWidget(maximumBtn);
@@ -32,10 +32,10 @@ MenuBar::MenuBar(QWidget *parent) :
 
     layout2=new QHBoxLayout();
     openBtn=new PicturePushButton();
-    openBtn->setPixmapPath(ICON_PATH+"open_icon.png");
+    openBtn->setPixmapPath(ICON_PATH+"folder.png");
     openBtn->setSizeExt(QSize(24,24));
     optionBtn=new PicturePushButton();
-    optionBtn->setPixmapPath(ICON_PATH+"info_icon.png");
+    optionBtn->setPixmapPath(ICON_PATH+"info.png");
     optionBtn->setSizeExt(QSize(24,24));
     layout2->addWidget(openBtn);
     layout2->addStretch();
@@ -53,6 +53,7 @@ MenuBar::MenuBar(QWidget *parent) :
     connect(minimumBtn,SIGNAL(clicked()),this,SIGNAL(minimumWindow()));
     connect(optionBtn,SIGNAL(clicked()),this,SIGNAL(displayOption()));
     connect(openBtn,SIGNAL(clicked()),this,SIGNAL(openFile()));
+    connect(maximumBtn,SIGNAL(clicked()),this,SLOT(maximizeBtnClicked()));
 }
 
 
@@ -91,3 +92,6 @@ void MenuBar::changeWidth(int x){
     this->resize(x,height());
 }
 
+void MenuBar::maximizeBtnClicked(){
+    maximize=~maximize;
+}

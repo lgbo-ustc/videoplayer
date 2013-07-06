@@ -8,16 +8,19 @@
 #include<QVBoxLayout>
 #include"controlbar.h"
 #include"menubar.h"
+#include"qmpwidget.h"
+#include"player.h"
 class MainWindow : public QWidget
 {
     Q_OBJECT
     QVBoxLayout* layout;
     QPushButton* btn;
-    MenuBar* bar;
-    ControlBar* cbar;
+    MenuBar* menuBar;
+    ControlBar* controlBar;
     QPoint position;
     QLabel* l1;
     QLabel* l2;
+    Player* playwidget;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

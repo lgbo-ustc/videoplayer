@@ -26,4 +26,5 @@ HEADERS  += widget.h \
     menubar.h \
     controlbar.h \
     picturepushbutton.h \
-    config.h
+    config.h \
+    player.h

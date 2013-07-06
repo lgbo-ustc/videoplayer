@@ -17,7 +17,7 @@ ControlBar::ControlBar(QWidget *parent) :
 
 
     playBtn=new PicturePushButton();
-    playBtn->setPixmapPath(ICON_PATH+"play_icon.png");
+    playBtn->setPixmapPath(ICON_PATH+"play.png");
     playBtn->setSizeExt(QSize(24,24));
 
     playSlider=new QSlider(Qt::Horizontal,this);
@@ -30,7 +30,7 @@ ControlBar::ControlBar(QWidget *parent) :
     setSliderStyle(volumeSlider);
 
     fullScreenBtn=new PicturePushButton();
-    fullScreenBtn->setPixmapPath(ICON_PATH+"fullscreen_icon.png");
+    fullScreenBtn->setPixmapPath(ICON_PATH+"view-fullscreen.png");
     fullScreenBtn->setSizeExt(QSize(24,24));
 
     layout->addWidget(playBtn);

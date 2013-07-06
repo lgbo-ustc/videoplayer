@@ -20,6 +20,7 @@ class MenuBar : public QWidget
     PicturePushButton* minimumBtn;
     PicturePushButton* openBtn;
     PicturePushButton* optionBtn;
+    bool maximize;
 public:
     explicit MenuBar(QWidget *parent = 0);
     ~MenuBar();
@@ -36,6 +37,7 @@ signals:
     void openFile();
 public slots:
     void changeWidth(int x);
+    void maximizeBtnClicked();
 };
 
 #endif // MENUBAR_H
