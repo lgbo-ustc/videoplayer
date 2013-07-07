@@ -20,7 +20,7 @@ class MainWindow : public QWidget
     QPoint position;
     QLabel* l1;
     QLabel* l2;
-
+    QMPwidget* player;
     bool isMenuBarEnable;
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -32,14 +32,9 @@ public:
 signals:
     void changeSize(int x,int y);
 public slots:
-    void moving(QPoint p);
-    void pushing(QPoint p);
-    void closebar();
     void menuBarMousePress(QMouseEvent* e);
     void menuBarMouseMove(QMouseEvent* e);
     void closeWindow();
-    void maximumWindow();
-    void minimumWindow();
     void mouseMoveEvent(QMouseEvent *);
 };
 

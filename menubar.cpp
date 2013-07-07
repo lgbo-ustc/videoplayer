@@ -2,6 +2,7 @@
 #include"config.h"
 #include"mainwindow.h"
 #include<QDebug>
+#include<QCursor>
 MenuBar::MenuBar(QWidget *parent) :
     QWidget(parent)
 {
@@ -14,8 +15,9 @@ MenuBar::MenuBar(QWidget *parent) :
     setWindowOpacity(0.7);
     setMouseTracking(true);
     this->parent=(MainWindow*)parent;
-    UIInit();
-    connecting();
+    timer=new QTimer(this);
+    setupUI();
+    setupConnection();
 }
 
 
@@ -28,9 +30,10 @@ MenuBar::~MenuBar(){
     delete closeBtn;
     delete maximumBtn;
     delete minimumBtn;
+    delete timer;
 }
 
-void MenuBar::UIInit(){
+void MenuBar::setupUI(){
     layout=new QVBoxLayout(this);
     layout1=new QHBoxLayout();
 
@@ -68,19 +71,32 @@ void MenuBar::UIInit(){
     setFixedHeight(90);
 }
 
-void MenuBar::connecting(){
+void MenuBar::setupConnection(){
     connect(closeBtn,SIGNAL(clicked()),this,SLOT(closeWin()));
     connect(maximumBtn,SIGNAL(clicked()),this,SLOT(maximumOrNormalWin()));
     connect(minimumBtn,SIGNAL(clicked()),this,SLOT(minimumWin()));
     connect(optionBtn,SIGNAL(clicked()),this,SLOT(infoDialogShow()));
     connect(openBtn,SIGNAL(clicked()),this,SLOT(openFile()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(timeout()));
 }
 
 
-void MenuBar::_show(){
-    show();
-    resize(parent->width(),height());
+void MenuBar::timeout(){
+    QPoint p=QCursor::pos();
+    if(x()<p.x()&&p.x()<x()+width()&&y()<p.y()&&p.y()<y()+height()){
 
+    }
+    else{
+        hide();
+        timer->stop();
+    }
+}
+
+void MenuBar::_show(){
+    resize(parent->width(),height());
+    move(parent->x(),parent->y());
+    show();
+    timer->start(2000);
 }
 
 void MenuBar::closeWin(){
@@ -90,20 +106,18 @@ void MenuBar::maximumOrNormalWin(){
     if(parent->isMaximized()){
         parent->showNormal();
         hide();
-        resize(parent->width(),height());
     }
     else{
         parent->showMaximized();
         hide();
-        resize(parent->width(),height());
     }
 }
 
 void MenuBar::minimumWin(){
     hide();
-    parent->minimumWindow();
+    parent->showMinimized();
+    parent->showNormal();
 
-    qDebug()<<QString("%1").arg(parent->width());
 }
 
 void MenuBar::infoDialogShow(){

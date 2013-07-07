@@ -1,6 +1,8 @@
 #include "controlbar.h"
 #include"config.h"
 #include<QPalette>
+#include<QCursor>
+#include"mainwindow.h"
 ControlBar::ControlBar(QWidget *parent) :
     QWidget(parent)
 {
@@ -12,9 +14,29 @@ ControlBar::ControlBar(QWidget *parent) :
     //setAttribute(Qt::WA_TranslucentBackground,true);
      setWindowOpacity(0.7);
     setFixedHeight(50);
+    timer=new QTimer(this);
+    this->parent=(MainWindow*)parent;
+    setupUI();
+    setupConnection();
+
+
+}
+
+
+ControlBar::~ControlBar(){
+    delete layout;
+    delete playBtn;
+    delete playSlider;
+    delete totleTimeLabel;
+    delete volumeSlider;
+    delete fullScreenBtn;
+    delete timer;
+
+}
+
+void ControlBar::setupUI(){
     layout=new QHBoxLayout(this);
     setLayout(layout);
-
 
     playBtn=new PicturePushButton();
     playBtn->setPixmapPath(ICON_PATH+"play.png");
@@ -41,20 +63,26 @@ ControlBar::ControlBar(QWidget *parent) :
     layout->addWidget(fullScreenBtn);
 }
 
-
-ControlBar::~ControlBar(){
-    delete layout;
-    delete playBtn;
-    delete playSlider;
-    delete totleTimeLabel;
-    delete volumeSlider;
-    delete fullScreenBtn;
-
+void ControlBar::setupConnection(){
+    connect(timer,SIGNAL(timeout()),this,SLOT(timerout()));
 }
 
-void ControlBar::changeWidth(int x){
-     playSlider->setMinimumWidth(x-240);
-    resize(x,height());
+void ControlBar::_show(){
+    resize(parent->width(),height());
+    move(parent->x(),parent->y()+parent->height()-height());
+    show();
+    timer->start(2000);
+}
+
+void ControlBar::timerout(){
+    QPoint p=QCursor::pos();
+    if(x()<p.x()&&p.x()<x()+width()&&y()<p.y()&&p.y()<y()+height()){
+
+    }
+    else{
+        hide();
+        timer->stop();
+    }
 }
 
 void ControlBar::setSliderStyle(QSlider *slider){

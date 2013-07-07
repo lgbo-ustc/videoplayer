@@ -6,6 +6,7 @@
 #include<QHBoxLayout>
 #include<QVBoxLayout>
 #include<QPushButton>
+#include<QTimer>
 #include"picturepushbutton.h"
 class MainWindow;
 
@@ -22,10 +23,10 @@ private:
     PicturePushButton* minimumBtn;
     PicturePushButton* openBtn;
     PicturePushButton* optionBtn;
-    int preWidth;
+    QTimer *timer;
     MainWindow* parent;
-    void UIInit();
-    void connecting();
+    void setupUI();
+    void setupConnection();
 protected:
     void mousePressEvent(QMouseEvent *);//重载函数响应鼠标按下
     void mouseMoveEvent(QMouseEvent *);//重载函数响应鼠标移动
@@ -42,6 +43,7 @@ public slots:
 private slots:
     void openFile();
     void infoDialogShow();
+    void timeout();
 };
 
 #endif // MENUBAR_H
