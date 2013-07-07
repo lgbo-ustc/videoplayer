@@ -27,7 +27,7 @@ void MainWindow::setupUI(){
     menuBar=new MenuBar(this);
     controlBar=new ControlBar(this);
     layout=new QVBoxLayout(this);
-    player=new QMPwidget(this);
+    player=new QMPwidget();
     layout->addWidget(player);
     layout->setContentsMargins(0,0,0,0);
     setLayout(layout);
