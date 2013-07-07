@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     menubar.cpp \
     controlbar.cpp \
-    picturepushbutton.cpp
+    picturepushbutton.cpp \
+    videowidget.cpp
 
 HEADERS  += widget.h \
     qmpwidget.h \
@@ -26,4 +27,5 @@ HEADERS  += widget.h \
     menubar.h \
     controlbar.h \
     picturepushbutton.h \
-    config.h
+    config.h \
+    videowidget.h
