@@ -4,35 +4,37 @@
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent)
 {
-    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window|Qt::FramelessWindowHint);
+
+    isMenuBarEnable=true;
+
     layout=new QVBoxLayout(this);
+    layout->addStretch();
     btn=new QPushButton("click");
     layout->addWidget(btn);
     menuBar=new MenuBar(this);
     controlBar=new ControlBar(this);
-    QStringList l;
-    playwidget=new Player(l,QString("/home/lgbo/视频/Warm.Bodies.2013.BDRip.X264-BMDruCHinYaN"),this);
-    layout->addWidget(playwidget);
-    /*
+
+
     l1=new QLabel();
     l2=new QLabel();
     layout->addWidget(l1);
     layout->addWidget(l2);
-    layout->addStretch();*/
+    layout->addStretch();
     setMouseTracking(true);
 
 
     setMinimumSize(480,320);
     move((QApplication::desktop()->width()-width())/2,(QApplication::desktop()->height()-height())/2);
      setLayout(layout);
-    connect(menuBar,SIGNAL(mousePressSig(QMouseEvent*)),this,SLOT(menuBarMousePress(QMouseEvent*)));
-    connect(menuBar,SIGNAL(mouseMoveSig(QMouseEvent*)),this,SLOT(menuBarMouseMove(QMouseEvent*)));
-    connect(this,SIGNAL(changeSize(int,int)),menuBar,SLOT(changeWidth(int)));
+    //connect(menuBar,SIGNAL(mousePressSig(QMouseEvent*)),this,SLOT(menuBarMousePress(QMouseEvent*)));
+    //connect(menuBar,SIGNAL(mouseMoveSig(QMouseEvent*)),this,SLOT(menuBarMouseMove(QMouseEvent*)));
+    //connect(this,SIGNAL(changeSize(int,int)),menuBar,SLOT(changeWidth(int)));
     connect(this,SIGNAL(changeSize(int,int)),controlBar,SLOT(changeWidth(int)));
     //connect(btn,SIGNAL(clicked()),this,SLOT(closebar()));
-    connect(menuBar,SIGNAL(closeWindow()),this,SLOT(closeWindow()));
-    connect(menuBar,SIGNAL(maxmumWindow()),this,SLOT(maximumWindow()));
-    connect(menuBar,SIGNAL(minimumWindow()),this,SLOT(minimumWindow()));
+    //connect(menuBar,SIGNAL(closeWindow()),this,SLOT(closeWindow()));
+    //connect(menuBar,SIGNAL(maxmumWindow()),this,SLOT(maximumWindow()));
+    //connect(menuBar,SIGNAL(minimumWindow()),this,SLOT(minimumWindow()));
 }
 
 MainWindow::~MainWindow(){
@@ -119,16 +121,31 @@ void MainWindow::mouseMoveEvent(QMouseEvent *e){
     l2->setText(QString("%1 %2").arg(mp.x()).arg(mp.y()));
     if(mp.x()>0&&mp.x()<width()&&mp.y()>0&&mp.y()<80){
         menuBar->move(x(),y());
-        menuBar->show();
+        menuBar->_show();
     }
     else{
         menuBar->hide();
     }
-    if(mp.x()>0&&mp.x()<width()&&mp.y()>height()-50&&mp.y()<height()){
+    if(mp.x()>2&&mp.x()<width()-2&&mp.y()>height()-50-2&&mp.y()<height()-2){
         controlBar->move(x(),y()+height()-50);
         controlBar->show();
     }
     else{
         controlBar->hide();
     }
+}
+
+void MainWindow::disableMenuBar(){
+    isMenuBarEnable=false;
+}
+
+void MainWindow::enableMenuBar(){
+    isMenuBarEnable=true;
+}
+
+void MainWindow::closeWin(){
+    isMenuBarEnable=false;
+    menuBar->close();
+    controlBar->close();
+    close();
 }

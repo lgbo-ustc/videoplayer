@@ -1,6 +1,7 @@
 #include "menubar.h"
 #include"config.h"
-
+#include"mainwindow.h"
+#include<QDebug>
 MenuBar::MenuBar(QWidget *parent) :
     QWidget(parent)
 {
@@ -11,10 +12,28 @@ MenuBar::MenuBar(QWidget *parent) :
     setWindowFlags(Qt::Tool |Qt::X11BypassWindowManagerHint|Qt::FramelessWindowHint);
     //setAttribute(Qt::WA_TranslucentBackground);
     setWindowOpacity(0.7);
-    maximize=false;
-    layout=new QVBoxLayout(this);
+    setMouseTracking(true);
+    this->parent=(MainWindow*)parent;
+    UIInit();
+    connecting();
+}
 
+
+MenuBar::~MenuBar(){
+    delete layout;
+    delete layout1;
+    delete layout2;
+    delete openBtn;
+    delete optionBtn;
+    delete closeBtn;
+    delete maximumBtn;
+    delete minimumBtn;
+}
+
+void MenuBar::UIInit(){
+    layout=new QVBoxLayout(this);
     layout1=new QHBoxLayout();
+
     layout1->addStretch();
     minimumBtn=new PicturePushButton();
     minimumBtn->setPixmapPath(ICON_PATH+"minus.png");
@@ -47,51 +66,77 @@ MenuBar::MenuBar(QWidget *parent) :
 
     setLayout(layout);
     setFixedHeight(90);
+}
 
-    connect(closeBtn,SIGNAL(clicked()),this,SIGNAL(closeWindow()));
-    connect(maximumBtn,SIGNAL(clicked()),this,SIGNAL(maxmumWindow()));
-    connect(minimumBtn,SIGNAL(clicked()),this,SIGNAL(minimumWindow()));
-    connect(optionBtn,SIGNAL(clicked()),this,SIGNAL(displayOption()));
-    connect(openBtn,SIGNAL(clicked()),this,SIGNAL(openFile()));
-    connect(maximumBtn,SIGNAL(clicked()),this,SLOT(maximizeBtnClicked()));
+void MenuBar::connecting(){
+    connect(closeBtn,SIGNAL(clicked()),this,SLOT(closeWin()));
+    connect(maximumBtn,SIGNAL(clicked()),this,SLOT(maximumOrNormalWin()));
+    connect(minimumBtn,SIGNAL(clicked()),this,SLOT(minimumWin()));
+    connect(optionBtn,SIGNAL(clicked()),this,SLOT(infoDialogShow()));
+    connect(openBtn,SIGNAL(clicked()),this,SLOT(openFile()));
 }
 
 
-MenuBar::~MenuBar(){
-    delete layout;
-    delete layout1;
-    delete layout2;
-    delete openBtn;
-    delete optionBtn;
-    delete closeBtn;
-    delete maximumBtn;
-    delete minimumBtn;
+void MenuBar::_show(){
+    show();
+    resize(parent->width(),height());
+
 }
+
+void MenuBar::closeWin(){
+    parent->closeWin();
+}
+void MenuBar::maximumOrNormalWin(){
+    if(parent->isMaximized()){
+        parent->showNormal();
+        hide();
+        resize(parent->width(),height());
+    }
+    else{
+        parent->showMaximized();
+        hide();
+        resize(parent->width(),height());
+    }
+}
+
+void MenuBar::minimumWin(){
+    hide();
+    parent->minimumWindow();
+
+    qDebug()<<QString("%1").arg(parent->width());
+}
+
+void MenuBar::infoDialogShow(){
+
+}
+
+void MenuBar::openFile(){
+
+}
+
 void MenuBar::mousePressEvent(QMouseEvent *event){
     if (event->button() == Qt::LeftButton) //点击左边鼠标
     {
-        dragPosition = event->globalPos() - frameGeometry().topLeft();
+        prePosition = event->globalPos() - frameGeometry().topLeft();
         //globalPos()获取根窗口的相对路径，frameGeometry().topLeft()获取主窗口左上角的位置
-        emit mousePressSig(event);
     }
     if (event->button() == Qt::RightButton)
     {
-        close();
+        //close();
     }
 }
 
 void MenuBar::mouseMoveEvent(QMouseEvent *event){
     if (event->buttons() == Qt::LeftButton) //当满足鼠标左键被点击时。
     {
-        move(event->globalPos() - dragPosition);//移动窗口
-        emit mouseMoveSig(event);
+        if(!parent->isMaximized()){
+            move(event->globalPos() - prePosition);//移动窗口
+            parent->move(event->globalPos() - prePosition);
+        }
+    }
+    else{
+
     }
 }
 
-void MenuBar::changeWidth(int x){
-    this->resize(x,height());
-}
 
-void MenuBar::maximizeBtnClicked(){
-    maximize=~maximize;
-}

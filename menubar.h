@@ -7,11 +7,13 @@
 #include<QVBoxLayout>
 #include<QPushButton>
 #include"picturepushbutton.h"
+class MainWindow;
 
 class MenuBar : public QWidget
 {
     Q_OBJECT
-    QPoint dragPosition;
+private:
+    QPoint prePosition;
     QVBoxLayout* layout;
     QHBoxLayout* layout1;
     QHBoxLayout* layout2;
@@ -20,24 +22,26 @@ class MenuBar : public QWidget
     PicturePushButton* minimumBtn;
     PicturePushButton* openBtn;
     PicturePushButton* optionBtn;
-    bool maximize;
-public:
-    explicit MenuBar(QWidget *parent = 0);
-    ~MenuBar();
+    int preWidth;
+    MainWindow* parent;
+    void UIInit();
+    void connecting();
+protected:
     void mousePressEvent(QMouseEvent *);//重载函数响应鼠标按下
     void mouseMoveEvent(QMouseEvent *);//重载函数响应鼠标移动
-
+public:
+    explicit MenuBar(QWidget *parent);
+    ~MenuBar();
+    void _show();
 signals:
-    void mousePressSig(QMouseEvent* e);
-    void mouseMoveSig(QMouseEvent* e);
-    void closeWindow();
-    void maxmumWindow();
-    void minimumWindow();
-    void displayOption();
-    void openFile();
+
 public slots:
-    void changeWidth(int x);
-    void maximizeBtnClicked();
+    void closeWin();
+    void minimumWin();
+    void maximumOrNormalWin();
+private slots:
+    void openFile();
+    void infoDialogShow();
 };
 
 #endif // MENUBAR_H

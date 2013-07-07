@@ -9,7 +9,7 @@
 #include"controlbar.h"
 #include"menubar.h"
 #include"qmpwidget.h"
-#include"player.h"
+
 class MainWindow : public QWidget
 {
     Q_OBJECT
@@ -20,11 +20,15 @@ class MainWindow : public QWidget
     QPoint position;
     QLabel* l1;
     QLabel* l2;
-    Player* playwidget;
+
+    bool isMenuBarEnable;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void resizeEvent(QResizeEvent *event);
+    void disableMenuBar();
+    void enableMenuBar();
+    void closeWin();
 signals:
     void changeSize(int x,int y);
 public slots:

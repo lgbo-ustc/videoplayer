@@ -2,7 +2,8 @@
 #define CONFIG_H
 
 #define ICON_PATH QString("/home/lgbo/图片/")
-#define SLIDER_STYLE QString("QSlider::groove:horizontal {border: 1px solid #bbb;background: white;height: 10px;border-radius: 4px;}")
+#define MENUBAR_HEIGHT 90
+#define CONTROLBAR_HEIGHT 50
 
 
 #endif // CONFIG_H
