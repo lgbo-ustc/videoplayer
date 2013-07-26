@@ -35,7 +35,7 @@ public:
     ~MenuBar();
     void _show();
 signals:
-
+    void openBtnClicked();
 public slots:
     void closeWin();
     void minimumWin();

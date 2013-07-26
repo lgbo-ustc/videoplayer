@@ -78,6 +78,7 @@ void MenuBar::setupConnection(){
     connect(optionBtn,SIGNAL(clicked()),this,SLOT(infoDialogShow()));
     connect(openBtn,SIGNAL(clicked()),this,SLOT(openFile()));
     connect(timer,SIGNAL(timeout()),this,SLOT(timeout()));
+    connect(openBtn,SIGNAL(clicked()),this,SIGNAL(openBtnClicked()));
 }
 
 

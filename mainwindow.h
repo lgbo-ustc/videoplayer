@@ -20,17 +20,22 @@ class MainWindow : public QWidget
     QPoint position;
     QLabel* l1;
     QLabel* l2;
-    QMPwidget* player;
+    //QMPwidget* player;
+    VideoWidget* player;
     void setupUI();
     void setupConnection();
+    void updateScreenSize();
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeWin();
+    void resizeEvent(QResizeEvent *event);
 signals:
     void changeSize(int x,int y);
 public slots:
     void mouseMoveEvent(QMouseEvent *);
+    void stateChanged(MPlayerState state);
+    void playOrPause();
 };
 
 #endif // MAINWINDOW_H

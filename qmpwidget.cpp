@@ -26,7 +26,7 @@
 #include <QTemporaryFile>
 #include <QThread>
 #include <QtDebug>
-
+#include<QDebug>
 #ifdef QT_OPENGL_LIB
  #include <QGLWidget>
 #endif
@@ -245,7 +245,7 @@ class QMPProcess : public QProcess
 				m_mode = QMPwidget::EmbeddedMode;
 #endif
 			}
-
+            m_mode = QMPwidget::EmbeddedMode;
 			// Figure out the mplayer version in order to check if 
 			// "-input nodefault-bindings" is available
 			bool useFakeInputconf = true;
@@ -294,11 +294,14 @@ class QMPProcess : public QProcess
 			if (m_mode == QMPwidget::EmbeddedMode) {
 				myargs += "-wid";
 				myargs += QString::number((int)widget->winId());
+                qDebug()<<QString("QMPwidget::EmbeddedMode");
 				if (!m_videoOutput.isEmpty()) {
 					myargs += "-vo";
 					myargs += m_videoOutput;
+                    qDebug()<<m_videoOutput;
 				}
 			} else {
+                qDebug()<<QString("not QMPwidget::EmbeddedMode");
 #ifdef QMP_USE_YUVPIPE
 				myargs += "-vo";
 				myargs += QString("yuv4mpeg:file=%1").arg(m_yuvReader->m_pipe);
@@ -306,6 +309,7 @@ class QMPProcess : public QProcess
 			}
 
 			myargs += args;
+            qDebug() << myargs;
 #ifdef QMP_DEBUG_OUTPUT
 			qDebug() << myargs;
 #endif
@@ -499,7 +503,6 @@ class QMPProcess : public QProcess
 			for (int i = 0; i < info.count(); i++) {
 				if ( (info[i] == "V" || info[i] == "A") && info.count() > i) {
 					m_streamPosition = info[i+1].toDouble();
-
 					// If the movie is near its end, start a timer that will check whether
 					// the movie has really finished.
 					if (qAbs(m_streamPosition - m_mediaInfo.length) < 1) {
@@ -617,7 +620,8 @@ QMPwidget::QMPwidget(QWidget *parent)
 	: QWidget(parent)
 {
 	setFocusPolicy(Qt::StrongFocus);
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setMouseTracking(true);
 
 #ifdef QT_OPENGL_LIB
 	m_widget = new QMPOpenGLVideoWidget(this);
@@ -1204,6 +1208,10 @@ void QMPwidget::mpVolumeChanged(int volume)
 	}
 }
 
+
+void QMPwidget::mouseMoveEvent(QMouseEvent *event){
+    emit this->mouseTrackEvent(event);
+}
 
 #include "qmpwidget.moc"
 

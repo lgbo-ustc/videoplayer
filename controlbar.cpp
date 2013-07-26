@@ -2,6 +2,7 @@
 #include"config.h"
 #include<QPalette>
 #include<QCursor>
+#include<QDebug>
 #include"mainwindow.h"
 ControlBar::ControlBar(QWidget *parent) :
     QWidget(parent)
@@ -44,6 +45,7 @@ void ControlBar::setupUI(){
 
     playSlider=new QSlider(Qt::Horizontal,this);
     setSliderStyle(playSlider);
+    playSlider->setRange(0,1000);
 
 
     totleTimeLabel=new QLabel("00:00");
@@ -65,13 +67,20 @@ void ControlBar::setupUI(){
 
 void ControlBar::setupConnection(){
     connect(timer,SIGNAL(timeout()),this,SLOT(timerout()));
+    connect(playBtn,SIGNAL(clicked()),this,SIGNAL(playBtnClicked()));
 }
 
 void ControlBar::_show(){
     resize(parent->width(),height());
+    playSlider->setMinimumWidth(parent->width()-230);
     move(parent->x(),parent->y()+parent->height()-height());
     show();
     timer->start(2000);
+}
+
+void ControlBar::setMediaLength(int l){
+     playSlider->setRange(0,l-1);
+     ml=l;
 }
 
 void ControlBar::timerout(){
@@ -82,6 +91,23 @@ void ControlBar::timerout(){
     else{
         hide();
         timer->stop();
+    }
+}
+
+void ControlBar::changePlaySliderPosisition(double pos){
+    //qDebug()<<QString("%1 %2").arg((int)pos).arg(ml);
+    playSlider->setSliderPosition((int)pos);
+    totleTimeLabel->setText(QString("%1:%2").arg(((int)pos)/60).arg(((int)pos)%60));
+}
+
+void ControlBar::stateChanged(MPlayerState state){
+    if(state==PlayingState){
+        playBtn->setPixmapPath(ICON_PATH+"play.png");
+        playBtn->setSizeExt(QSize(24,24));
+    }
+    else if(state==PausedState){
+        playBtn->setPixmapPath(ICON_PATH+"pause.png");
+        playBtn->setSizeExt(QSize(24,24));
     }
 }
 

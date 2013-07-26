@@ -131,6 +131,7 @@ class QMPwidget : public QWidget
 		virtual void mouseDoubleClickEvent(QMouseEvent *event);
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void resizeEvent(QResizeEvent *event);
+        void mouseMoveEvent(QMouseEvent *event);
 
 	private:
 		void updateWidgetSize();
@@ -149,6 +150,7 @@ class QMPwidget : public QWidget
 
 		void readStandardOutput(const QString &line);
 		void readStandardError(const QString &line);
+        void mouseTrackEvent(QMouseEvent *event);
 
 	private:
 		QMPProcess *m_process;

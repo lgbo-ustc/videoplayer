@@ -10,6 +10,7 @@
 #include<QLabel>
 #include<QTimer>
 #include"picturepushbutton.h"
+#include"videowidget.h"
 class MainWindow;
 class ControlBar : public QWidget
 {
@@ -26,16 +27,19 @@ class ControlBar : public QWidget
     void setSliderStyle(QSlider* slider);
     void setupUI();
     void setupConnection();
+    int ml;
 public:
     explicit ControlBar(QWidget *parent );
     ~ControlBar();
     void _show();
+    void setMediaLength(int l);
 signals:
+    void playBtnClicked();
 private slots:
     void timerout();
 public slots:
-
-
+    void changePlaySliderPosisition(double pos);
+    void stateChanged(MPlayerState state);
 };
 
 #endif // CONTROLBAR_H
