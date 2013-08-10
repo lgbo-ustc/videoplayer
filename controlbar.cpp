@@ -3,8 +3,9 @@
 #include<QPalette>
 #include<QCursor>
 #include<QDebug>
+#include<QFileDialog>
 #include"mainwindow.h"
-ControlBar::ControlBar(QWidget *parent) :
+ControlBar::ControlBar(QWidget *parent,VideoWidget* player) :
     QWidget(parent)
 {
     /*
@@ -17,6 +18,7 @@ ControlBar::ControlBar(QWidget *parent) :
     setFixedHeight(50);
     timer=new QTimer(this);
     this->parent=(MainWindow*)parent;
+    this->player=player;
     setupUI();
     setupConnection();
 
@@ -43,14 +45,20 @@ void ControlBar::setupUI(){
     playBtn->setPixmapPath(ICON_PATH+"play.png");
     playBtn->setSizeExt(QSize(24,24));
 
+    subtitleBtn=new QPushButton("字幕");
+    subtitleBtn->setFlat(true);
+    subtitleBtn->setMaximumWidth(32);
+
     playSlider=new QSlider(Qt::Horizontal,this);
     setSliderStyle(playSlider);
     playSlider->setRange(0,1000);
 
 
-    totleTimeLabel=new QLabel("00:00");
+    totleTimeLabel=new QLabel("00:00/00:00");
 
     volumeSlider=new QSlider(Qt::Horizontal);
+    volumeSlider->setRange(0,100);
+    volumeSlider->setValue(50);
     setSliderStyle(volumeSlider);
 
     fullScreenBtn=new PicturePushButton();
@@ -61,27 +69,32 @@ void ControlBar::setupUI(){
     layout->addWidget(playSlider);
     layout->addWidget(totleTimeLabel);
     layout->addStretch();
+    layout->addWidget(subtitleBtn);
     layout->addWidget(volumeSlider);
     layout->addWidget(fullScreenBtn);
 }
 
 void ControlBar::setupConnection(){
     connect(timer,SIGNAL(timeout()),this,SLOT(timerout()));
-    connect(playBtn,SIGNAL(clicked()),this,SIGNAL(playBtnClicked()));
+    connect(playSlider,SIGNAL(sliderPressed()),this,SLOT(playSliderPressed()));
+    connect(playSlider,SIGNAL(sliderReleased()),this,SLOT(playSliderReleased()));
+    connect(volumeSlider,SIGNAL(valueChanged(int)),player,SLOT(changeVolume(int)));
+    connect(player,SIGNAL(volumeChanged(int)),volumeSlider,SLOT(setValue(int)));
+    connect(playBtn,SIGNAL(clicked()),player,SLOT(playOrPause()));
+    connect(player,SIGNAL(stateChanged(MPlayerState)),this,SLOT(stateChanged(MPlayerState)));
+    connect(player,SIGNAL(streamPositionChanged(double)),this,SLOT(changePlaySliderPosisition(double)));
+    connect(fullScreenBtn,SIGNAL(clicked()),parent,SLOT(toggleFullScreen()));
+    connect(subtitleBtn,SIGNAL(clicked()),this,SLOT(loadSubtitle()));
 }
 
 void ControlBar::_show(){
     resize(parent->width(),height());
-    playSlider->setMinimumWidth(parent->width()-230);
+    playSlider->setMinimumWidth(parent->width()-300);
     move(parent->x(),parent->y()+parent->height()-height());
     show();
     timer->start(2000);
 }
 
-void ControlBar::setMediaLength(int l){
-     playSlider->setRange(0,l-1);
-     ml=l;
-}
 
 void ControlBar::timerout(){
     QPoint p=QCursor::pos();
@@ -97,19 +110,55 @@ void ControlBar::timerout(){
 void ControlBar::changePlaySliderPosisition(double pos){
     //qDebug()<<QString("%1 %2").arg((int)pos).arg(ml);
     playSlider->setSliderPosition((int)pos);
-    totleTimeLabel->setText(QString("%1:%2").arg(((int)pos)/60).arg(((int)pos)%60));
+    QString str;
+    str+=QString("%1:%2/").arg((int)(player->getMediaLength())/60).arg((int)(player->getMediaLength())%60);
+    str+=QString("%1:%2").arg(((int)pos)/60).arg(((int)pos)%60);
+    totleTimeLabel->setText(str);
 }
 
 void ControlBar::stateChanged(MPlayerState state){
+    playSlider->setRange(0,(int)player->getMediaLength());
     if(state==PlayingState){
-        playBtn->setPixmapPath(ICON_PATH+"play.png");
+
+       // playBtn->setPixmapPath(ICON_PATH+"play.png");
+        playBtn->setIcon(QIcon((ICON_PATH+"play.png")));
+        qDebug()<<QString("play");
         playBtn->setSizeExt(QSize(24,24));
     }
     else if(state==PausedState){
-        playBtn->setPixmapPath(ICON_PATH+"pause.png");
+        //playBtn->setPixmapPath(ICON_PATH+"pause.png");
+        playBtn->setIcon(QIcon((ICON_PATH+"pause.png")));
         playBtn->setSizeExt(QSize(24,24));
+        qDebug()<<QString("pause");
     }
 }
+
+void ControlBar::playSliderPressed(){
+    disconnect(player,SIGNAL(streamPositionChanged(double)),this,SLOT(changePlaySliderPosisition(double)));
+}
+
+void ControlBar::playSliderReleased(){
+    player->absoluteSeek(playSlider->value());
+    connect(player,SIGNAL(streamPositionChanged(double)),this,SLOT(changePlaySliderPosisition(double)));
+}
+
+void ControlBar::updateSize(){
+    resize(parent->width(),height());
+    playSlider->setMinimumWidth(parent->width()-230);
+    move(parent->x(),parent->y()+parent->height()-height());
+}
+
+
+void ControlBar::loadSubtitle(){
+    QString filename=QFileDialog::getOpenFileName(this,
+                                                  "open a file",
+                                                  "/home",
+                                                  "Document files (*.srt);;All files(*.*)");
+    if(!filename.isNull()){
+        player->sub_load(filename);
+    }
+}
+
 
 void ControlBar::setSliderStyle(QSlider *slider){
 

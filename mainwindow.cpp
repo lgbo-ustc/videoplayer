@@ -10,10 +10,11 @@ MainWindow::MainWindow(QWidget *parent) :
     setMouseTracking(true);
     setupUI();
     setupConnection();
-    QStringList l;
+    //QStringList l;
     //l+=QString("/home/lgbo/视频/Warm.Bodies.2013.BDRip.X264-BMDruCHinYaN/wb.mkv");
-    l+=QString("/usr/share/example-content/Ubuntu_Free_Culture_Showcase/How fast.ogg");
-    player->start(l);
+    //l+=QString("/usr/share/example-content/Ubuntu_Free_Culture_Showcase/How fast.ogg");
+    //player->start(l);
+
 
 }
 
@@ -28,37 +29,40 @@ MainWindow::~MainWindow(){
 
 void MainWindow::setupUI(){
     menuBar=new MenuBar(this);
-    controlBar=new ControlBar(this);
+
     layout=new QVBoxLayout(this);
     //player=new QMPwidget();
     player=new VideoWidget(this);
+    controlBar=new ControlBar(this,player);
     layout->setContentsMargins(0,0,0,0);
     layout->addWidget(player);
     setLayout(layout);
-    resize(480,320);
+    resize(800,480);
     move((QApplication::desktop()->width()-width())/2,(QApplication::desktop()->height()-height())/2);
 }
 
 void MainWindow::setupConnection(){
     //connect(player,SIGNAL(mouseTrackEvent(QMouseEvent*)),this,SLOT(mouseMoveEvent(QMouseEvent*)));
-    connect(menuBar,SIGNAL(openBtnClicked()),this,SLOT(play()));
-    connect(player,SIGNAL(streamPositionChanged(double)),controlBar,SLOT(changePlaySliderPosisition(double)));
-    connect(player,SIGNAL(stateChanged(MPlayerState)),this,SLOT(stateChanged(MPlayerState)));
-    connect(player,SIGNAL(stateChanged(MPlayerState)),controlBar,SLOT(stateChanged(MPlayerState)));
-    connect(controlBar,SIGNAL(playBtnClicked()),this,SLOT(playOrPause()));
+    //connect(menuBar,SIGNAL(openBtnClicked()),this,SLOT(t()));
+    connect(menuBar,SIGNAL(loadFile(QString)),this,SLOT(loadFile(QString)));
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *e){
     QPoint mp=e ->pos();//这是相对于本窗口的位置
     if(mp.x()>0&&mp.x()<width()&&mp.y()>0&&mp.y()<menuBar->height()){
-        menuBar->_show();
+        if(true){
+
+            menuBar->_show();
+        }
 
     }
     else{
         menuBar->hide();
     }
     if(mp.x()>0&&mp.x()<width()&&mp.y()>height()-controlBar->height()&&mp.y()<height()){
-        controlBar->_show();
+        if(true||this->isActiveWindow()){
+            controlBar->_show();
+        }
     }
     else{
         controlBar->hide();
@@ -67,12 +71,28 @@ void MainWindow::mouseMoveEvent(QMouseEvent *e){
 
 void MainWindow::resizeEvent(QResizeEvent *event){
     //Q_UNUSED(event);
-    //updateScreenSize();
+    if(!controlBar->isHidden())
+        controlBar->updateSize();
+    if(!menuBar->isHidden())
+        menuBar->updateSize();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event){
+
+    switch(event->key()){
+
+    case Qt::Key_F:
+        toggleFullScreen();
+        break;
+    }
+
 }
 
 void MainWindow::updateScreenSize(){
     player->updateWidgetSize();
 }
+
+
 
 void MainWindow::closeWin(){
     menuBar->close();
@@ -80,23 +100,25 @@ void MainWindow::closeWin(){
     close();
 }
 
-void MainWindow::playOrPause(){
-    MPlayerState s=player->getMPlayerState();
-    if(s==PlayingState){
-        player->pause();
-    }
-    else if(s==PausedState){
-        player->play();
+void MainWindow::test(){
+    QStringList l;
+    //l+=QString("/home/lgbo/视频/Warm.Bodies.2013.BDRip.X264-BMDruCHinYaN/wb.mkv");
+    l+=QString("/usr/share/example-content/Ubuntu_Free_Culture_Showcase/How fast.ogg");
+    player->start(l);
+}
+
+void MainWindow::toggleFullScreen(){
+    qDebug()<<QString("toggle");
+    if (!isFullScreen()) {
+       showFullScreen();
+    } else {
+        showNormal();
     }
 }
 
-void MainWindow::stateChanged(MPlayerState state){
-    if(state==PlayingState){
-        QSize s=player->getMediaSize();
-        if(s.width()!=0&&s.height()!=0){
 
-            //resize(this->width(),(int)(this->width()*((double)s.height()/s.width())));
-            controlBar->setMediaLength((int)player->getMediaLength());
-        }
-    }
+void MainWindow::loadFile(QString url){
+    QStringList l;
+    l+=url;
+    player->start(l);
 }

@@ -25,17 +25,23 @@ class MainWindow : public QWidget
     void setupUI();
     void setupConnection();
     void updateScreenSize();
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void closeWin();
+protected:
     void resizeEvent(QResizeEvent *event);
+    //void customContextMenuRequested(const QPoint &pos);
 signals:
     void changeSize(int x,int y);
 public slots:
     void mouseMoveEvent(QMouseEvent *);
-    void stateChanged(MPlayerState state);
-    void playOrPause();
+    void keyPressEvent(QKeyEvent *);
+    void toggleFullScreen();
+private slots:
+    void test();
+    void loadFile(QString url);
 };
 
 #endif // MAINWINDOW_H

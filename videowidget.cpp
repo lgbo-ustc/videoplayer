@@ -12,30 +12,45 @@ public:
     ScreenWidget(QWidget* parent=0)
         :QWidget(parent){
         setAttribute(Qt::WA_NoSystemBackground);
+        setUpdatesEnabled(true);
         setMouseTracking(true);
     }
     ~ScreenWidget(){}
     void setShowImage(QString s){
+        qDebug()<<QString("setshwosdf");
         image_path=s;
         update();
     }
+
+    void  showImage(){
+        QPainter p(this);
+        QImage image(image_path);
+        QRectF target(0, 0,width(), height());
+        QRectF source(0.0, 0.0, image.width(), image.height());
+        p.drawImage(target, image, source);
+    }
+
     void mouseMoveEvent(QMouseEvent *e){
         e->ignore();
     }
 protected:
     void paintEvent(QPaintEvent *event){
         QPainter p(this);
-        p.setCompositionMode(QPainter::CompositionMode_Source);
 
+        //p.setCompositionMode(QPainter::CompositionMode_Source);
+        qDebug()<<"sfsdf";
         if (!image_path.isEmpty()) {
-            QImage image;
-            image.load(image_path);
+
             p.fillRect(rect(), Qt::black);
+            QImage image(image_path);
+            QRectF target(0, 0,width(), height());
+            QRectF source(0.0, 0.0, image.width(), image.height());
+            //p.drawImage(target, image, source);
             p.drawImage(rect().center() - image.rect().center(), image);
         } else {
             p.fillRect(rect(), Qt::black);
         }
-        p.end();
+        //p.end();
     }
 };
 
@@ -48,12 +63,18 @@ VideoWidget::VideoWidget(QWidget *parent) :
 
     playerState=NotStartedState;
     streamPosition=0.0;
+    volValue=50;
 
     screen=new ScreenWidget(this);
-    screen->setAttribute(Qt::WA_NoSystemBackground);
+    //screen->setAttribute(Qt::WA_NoSystemBackground);
+    screen->setShowImage("/home/lgbo/图片/C360_2012-07-30-18-28-11.jpg");
+    //screen->showImage();
 
     playerProcess=new QProcess(this);
 
+    contexMenu=new QMenu(this);
+    contexMenu->addAction("test1");
+    contexMenu->addAction("test1");
     /*
     layout=new QVBoxLayout(this);
     layout->setContentsMargins(0,0,0,0);
@@ -62,16 +83,22 @@ VideoWidget::VideoWidget(QWidget *parent) :
     setLayout(layout);
     */
     connect(playerProcess,SIGNAL(readyReadStandardOutput()),this,SLOT(readStdout()));
+    //connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(showContexMenu(QPoint)));
+
 
 }
 
 VideoWidget::~VideoWidget(){
     delete screen;
     delete playerProcess;
+    delete contexMenu;
     //delete layout;
 }
 
 void VideoWidget::start(QStringList args){
+    if (playerProcess->state() == QProcess::Running) {
+        quit();
+    }
     QStringList margs;
     margs += "-slave";
     //margs += "-idle";
@@ -85,11 +112,44 @@ void VideoWidget::start(QStringList args){
     margs += QString::number((int)screen->winId());
     margs += args;
     playerProcess->start(QString("mplayer"),margs);
+    changeVolume(volValue);
     qDebug()<<margs<<MPLAYER_PATH;
 }
 
 void VideoWidget::mouseMoveEvent(QMouseEvent *event){
     event->ignore();
+}
+
+void VideoWidget::mousePressEvent(QMouseEvent *event){
+    playOrPause();
+}
+
+void VideoWidget::keyPressEvent(QKeyEvent *event){
+    bool accepted=true;
+    switch(event->key()){
+    case Qt::Key_Right:
+        qDebug()<<QString("right");
+        seek(5,0);
+        break;
+    case Qt::Key_Left:
+        qDebug()<<QString("left");
+        seek(-5,0);
+        break;
+    case Qt::Key_Down:
+        qDebug()<<QString("down");
+        this->relativeChangeVolume(-2);
+        break;
+    case Qt::Key_Up:
+        qDebug()<<QString("up");
+        this->relativeChangeVolume(2);
+        break;
+    case Qt::Key_Space:
+        playOrPause();
+        break;
+     default:
+        accepted=false;
+    }
+    event->setAccepted(accepted);
 }
 
 void VideoWidget::readStdout(){
@@ -235,21 +295,27 @@ void VideoWidget::writeCommand(const QString &s){
 }
 
 void VideoWidget::load(const QString &url){
+    Q_ASSERT_X(playerProcess->state() != QProcess::NotRunning, "QMPwidget::load()", "MPlayer process not started yet");
 
+    // From the MPlayer slave interface documentation:
+    // "Try using something like [the following] to switch to the next file.
+    // It avoids audio playback starting to play the old file for a short time
+    // before switching to the new one.
+    writeCommand("pausing_keep_force pt_step 1");
+    writeCommand("get_property pause");
+
+    writeCommand(QString("loadfile '%1'").arg(url));
 }
 
 /*触发状态在PlayingState和PauseState之间转换*/
 void VideoWidget::play(){
     if(playerState==PausedState){
-        screen->setUpdatesEnabled(true);
         writeCommand("pause");
     }
 }
 void VideoWidget::pause(){
     if(playerState==PlayingState){
-        screen->setUpdatesEnabled(false);
         writeCommand("pause");
-
     }
 }
 
@@ -276,4 +342,60 @@ QSize VideoWidget::getMediaSize(){
 
 double VideoWidget::getMediaLength(){
     return mediaInfo.length;
+}
+
+void VideoWidget::playOrPause(){
+    if(playerState==PausedState){
+        writeCommand("pause");
+    }
+    else if(playerState==PlayingState){
+         writeCommand("pause");
+    }
+}
+
+void VideoWidget::seek(int offset, int whence){
+    qDebug()<<QString("seek %1").arg(offset);
+   writeCommand(QString("seek %1 %2").arg(offset).arg(whence));
+}
+
+void VideoWidget::absoluteSeek(int offset){
+    this->seek(offset,2);
+}
+
+void VideoWidget::changeVolume(int volume){
+    volValue=volume;
+    writeCommand(QString("volume %1 %2").arg(volume).arg(1));
+}
+
+void VideoWidget::relativeChangeVolume(int offset){
+    writeCommand(QString("volume %1").arg(offset));
+    volValue+=offset;
+    if(volValue <0){
+        volValue=0;
+    }
+    if(volValue>100){
+        volValue=100;
+    }
+    emit volumeChanged(volValue);
+}
+
+
+
+void VideoWidget::sub_load(QString url){
+    if(playerState==PlayingState||playerState==PausedState){
+        writeCommand(QString("sub_load ")+url);
+        writeCommand(QString("sub_select 0"));
+    }
+}
+
+
+void VideoWidget::contextMenuEvent(QContextMenuEvent *){
+    qDebug()<<QString("right click");
+    QCursor cur=this->cursor();
+    contexMenu->exec(cur.pos());
+}
+
+void VideoWidget::showContexMenu(const QPoint &pos){
+    qDebug()<<QString("right click");
+    contexMenu->exec(QCursor::pos());
 }

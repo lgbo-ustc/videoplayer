@@ -358,6 +358,7 @@ class QMPProcess : public QProcess
 
 		void quit()
 		{
+
 			writeCommand("quit");
 			QProcess::waitForFinished(100);
 			if (QProcess::state() == QProcess::Running) {

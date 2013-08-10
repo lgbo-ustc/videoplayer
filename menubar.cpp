@@ -3,6 +3,7 @@
 #include"mainwindow.h"
 #include<QDebug>
 #include<QCursor>
+#include<QMessageBox>
 MenuBar::MenuBar(QWidget *parent) :
     QWidget(parent)
 {
@@ -31,9 +32,17 @@ MenuBar::~MenuBar(){
     delete maximumBtn;
     delete minimumBtn;
     delete timer;
+    //delete subtitleBtn;
+    //delete fileDialog;
+
 }
 
 void MenuBar::setupUI(){
+
+    //fileDialog=new QFileDialog(this);
+    //fileDialog->setDirectory("/home");
+    //fileDialog->setFilter(QDir::Dirs|QDir::Files);
+
     layout=new QVBoxLayout(this);
     layout1=new QHBoxLayout();
 
@@ -59,7 +68,11 @@ void MenuBar::setupUI(){
     optionBtn=new PicturePushButton();
     optionBtn->setPixmapPath(ICON_PATH+"info.png");
     optionBtn->setSizeExt(QSize(24,24));
+    //subtitleBtn=new PicturePushButton();
+    //subtitleBtn->setPixmapPath(ICON_PATH+"subtitle.png");
+    //subtitleBtn->setSizeExt(QSize(24,24));
     layout2->addWidget(openBtn);
+    //layout2->addWidget(subtitleBtn);
     layout2->addStretch();
     layout2->addWidget(optionBtn);
 
@@ -76,9 +89,8 @@ void MenuBar::setupConnection(){
     connect(maximumBtn,SIGNAL(clicked()),this,SLOT(maximumOrNormalWin()));
     connect(minimumBtn,SIGNAL(clicked()),this,SLOT(minimumWin()));
     connect(optionBtn,SIGNAL(clicked()),this,SLOT(infoDialogShow()));
-    connect(openBtn,SIGNAL(clicked()),this,SLOT(openFile()));
     connect(timer,SIGNAL(timeout()),this,SLOT(timeout()));
-    connect(openBtn,SIGNAL(clicked()),this,SIGNAL(openBtnClicked()));
+    connect(openBtn,SIGNAL(clicked()),this,SLOT(openFile()));
 }
 
 
@@ -126,6 +138,15 @@ void MenuBar::infoDialogShow(){
 }
 
 void MenuBar::openFile(){
+    //fileDialog->show();
+
+    QString filename=QFileDialog::getOpenFileName(this,
+                                                  "open a file",
+                                                  "/home",
+                                                  "Document files ("+VIDEO_FORMATS+");;All files(*.*)");
+    if(!filename.isNull()){
+        emit loadFile(filename);
+    }
 
 }
 
@@ -154,4 +175,12 @@ void MenuBar::mouseMoveEvent(QMouseEvent *event){
     }
 }
 
+void MenuBar::mouseDoubleClickEvent(QMouseEvent *event){
+    parent->toggleFullScreen();
+}
+
+void MenuBar::updateSize(){
+    resize(parent->width(),height());
+    move(parent->x(),parent->y());
+}
 
